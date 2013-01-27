@@ -16,6 +16,7 @@
 ;------------------------------------------------------------------------------
 ; EngineObject.clp - Base object type for all objects in the Wolf3d expert
 ; system.
+; Written by Joshua Scoggins (1/26/2013)
 ;------------------------------------------------------------------------------
 (defclass EngineObject
   (is-a USER)

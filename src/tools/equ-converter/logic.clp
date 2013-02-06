@@ -23,15 +23,30 @@
   (slot id)
   (slot value))
 ;------------------------------------------------------------------------------
-(defrule open-target-file
+(defrule open-target-file-stdout
          ?fct <- (convert equ file with ?path)
          =>
          (retract ?fct)
          (bind ?name (gensym*))
          (if (open ?path ?name) then
-           (assert (parse equ file ?name))
+           (assert (parse equ file ?name)
+                   (output to t))
            else
            (printout werror "ERROR: The given file " ?path " could not be opened" crlf)
+           (halt)))
+;------------------------------------------------------------------------------
+(defrule open-target-file
+         ?fct <- (convert equ file with ?path to ?outPath)
+         =>
+         (retract ?fct)
+         (bind ?name (gensym*))
+         (bind ?name2 (gensym*))
+         (if (and (open ?path ?name) 
+                  (open ?outPath ?name2 "w")) then
+           (assert (parse equ file ?name)
+                   (output to ?name2))
+           else
+           (printout werror "ERROR: The given file " ?path " or " ?outPath " could not be opened" crlf)
            (halt)))
 ;------------------------------------------------------------------------------
 (defrule parse-line
@@ -53,32 +68,35 @@
          (assert (parse equ file ?name line ?b eq ?a)))
 ;------------------------------------------------------------------------------
 (defrule retract-empty-form 
- (declare (salience -1))
+         (declare (salience -1))
          ?fct <- (parse equ file ?name line)
          =>
          (retract ?fct))
 ;------------------------------------------------------------------------------
 (defrule build-intermediate-form
- (declare (salience -1))
+         (declare (salience -1))
          ?fct <- (parse equ file ?name line ?id eq ?value)
          =>
          (retract ?fct)
          (make-instance of IntermediateForm (id ?id) (value ?value)))
 ;------------------------------------------------------------------------------
 (defrule convert-intermediate-form-to-global-variable
- (declare (salience -1))
+         (declare (salience -1))
          (to global-variable)
+         (output to ?n)
          (object (is-a IntermediateForm) 
                  (id ?id) 
                  (value ?value))
          =>
-         (format t "(defglobal *?%s* = %d)%n" ?id ?value))
+         (format ?n "(defglobal *?%s* = %d)%n" ?id ?value))
 ;------------------------------------------------------------------------------
 (defrule convert-intermediate-form-to-object
+         (declare (salience -1))
          (to object)
+         (output to ?n)
          (object (is-a IntermediateForm) 
                  (id ?id) 
                  (value ?value))
          =>
-         (format t "(make-instance [%s] of Entry (parent nil) (id %s) (value %d))%n" ?id ?id ?value))
+         (format ?n "([%s] of Entry (parent nil) (id %s) (value %d))%n" ?id ?id ?value))
 ;------------------------------------------------------------------------------

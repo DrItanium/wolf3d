@@ -14,17 +14,17 @@
 ;You should have received a copy of the Affero GNU General Public License
 ;along with wolf3d-logic.  If not, see <http://www.gnu.org/licenses/>.
 ;------------------------------------------------------------------------------
-; logic.clp - contains the EQU converter logic
+; EQUConversionLogic.clp - contains the EQU converter logic
 ; Written by Joshua Scoggins (2/6/2013)
 ;------------------------------------------------------------------------------
-(defclass IntermediateForm
-  "Represents the value bound to a given pair"
-  (is-a USER)
-  (slot id)
-  (slot value))
+(defmodule EQUConversion 
+ (import types ?ALL)
+ (export ?ALL))
 ;------------------------------------------------------------------------------
-(defrule open-target-file-stdout
-         ?fct <- (convert equ file with ?path)
+(defrule EQUConversion::open-target-file-stdout
+         ?fct <- (message (to EQUConversion)
+                          (action convert-equ-file)
+                          (arguments ?path))
          =>
          (retract ?fct)
          (bind ?name (gensym*))
@@ -35,7 +35,7 @@
            (printout werror "ERROR: The given file " ?path " could not be opened" crlf)
            (halt)))
 ;------------------------------------------------------------------------------
-(defrule open-target-file
+(defrule EQUConversion::open-target-file
          ?fct <- (convert equ file with ?path to ?outPath)
          =>
          (retract ?fct)
@@ -49,7 +49,7 @@
            (printout werror "ERROR: The given file " ?path " or " ?outPath " could not be opened" crlf)
            (halt)))
 ;------------------------------------------------------------------------------
-(defrule parse-line
+(defrule EQUConversion::parse-line
          (declare (salience 1))
          ?fct <- (parse equ file ?name)
          =>
@@ -61,26 +61,26 @@
            else 
            (close ?name)))
 ;------------------------------------------------------------------------------
-(defrule replace-equals-sign
+(defrule EQUConversion::replace-equals-sign
          ?fct <- (parse equ file ?name line ?b ?id&:(eq ?id =) ?a)
          =>
          (retract ?fct)
          (assert (parse equ file ?name line ?b eq ?a)))
 ;------------------------------------------------------------------------------
-(defrule retract-empty-form 
+(defrule EQUConversion::retract-empty-form 
          (declare (salience -1))
          ?fct <- (parse equ file ?name line)
          =>
          (retract ?fct))
 ;------------------------------------------------------------------------------
-(defrule build-intermediate-form
+(defrule EQUConversion::build-intermediate-form
          (declare (salience -1))
          ?fct <- (parse equ file ?name line ?id eq ?value)
          =>
          (retract ?fct)
          (make-instance of IntermediateForm (id ?id) (value ?value)))
 ;------------------------------------------------------------------------------
-(defrule convert-intermediate-form-to-global-variable
+(defrule EQUConversion::convert-intermediate-form-to-global-variable
          (declare (salience -1))
          (to global-variable)
          (output to ?n)
@@ -90,7 +90,7 @@
          =>
          (format ?n "(defglobal *?%s* = %d)%n" ?id ?value))
 ;------------------------------------------------------------------------------
-(defrule convert-intermediate-form-to-object
+(defrule EQUConversion::convert-intermediate-form-to-object
          (declare (salience -1))
          (to object)
          (output to ?n)

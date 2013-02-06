@@ -17,6 +17,12 @@
 ; logic.clp - contains the EQU converter logic
 ; Written by Joshua Scoggins (2/6/2013)
 ;------------------------------------------------------------------------------
+(defclass IntermediateForm
+  "Represents the value bound to a given pair"
+  (is-a USER)
+  (slot id)
+  (slot value))
+;------------------------------------------------------------------------------
 (defrule open-target-file
          ?fct <- (convert equ file with ?path)
          =>
@@ -29,11 +35,50 @@
            (halt)))
 ;------------------------------------------------------------------------------
 (defrule parse-line
- ?fct <- (parse equ file ?name)
- =>
- (retract ?fct)
- (bind ?result (readline ?name))
- (if (neq ?result EOF) then
-     (assert (parse equ file ?name line (explode$ ?result))
-             (parse equ file ?name))))
+         (declare (salience 1))
+         ?fct <- (parse equ file ?name)
+         =>
+         (retract ?fct)
+         (bind ?result (readline ?name))
+         (if (neq ?result EOF) then
+           (assert (parse equ file ?name line (explode$ ?result))
+                   (parse equ file ?name))
+           else 
+           (close ?name)))
+;------------------------------------------------------------------------------
+(defrule replace-equals-sign
+         ?fct <- (parse equ file ?name line ?b ?id&:(eq ?id =) ?a)
+         =>
+         (retract ?fct)
+         (assert (parse equ file ?name line ?b eq ?a)))
+;------------------------------------------------------------------------------
+(defrule retract-empty-form 
+ (declare (salience -1))
+         ?fct <- (parse equ file ?name line)
+         =>
+         (retract ?fct))
+;------------------------------------------------------------------------------
+(defrule build-intermediate-form
+ (declare (salience -1))
+         ?fct <- (parse equ file ?name line ?id eq ?value)
+         =>
+         (retract ?fct)
+         (make-instance of IntermediateForm (id ?id) (value ?value)))
+;------------------------------------------------------------------------------
+(defrule convert-intermediate-form-to-global-variable
+ (declare (salience -1))
+         (to global-variable)
+         (object (is-a IntermediateForm) 
+                 (id ?id) 
+                 (value ?value))
+         =>
+         (format t "(defglobal *?%s* = %d)%n" ?id ?value))
+;------------------------------------------------------------------------------
+(defrule convert-intermediate-form-to-object
+         (to object)
+         (object (is-a IntermediateForm) 
+                 (id ?id) 
+                 (value ?value))
+         =>
+         (format t "(make-instance [%s] of Entry (parent nil) (id %s) (value %d))%n" ?id ?id ?value))
 ;------------------------------------------------------------------------------

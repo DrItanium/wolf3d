@@ -42,7 +42,7 @@
          (bind ?name (gensym*))
          (bind ?name2 (gensym*))
          (if (and (open ?path ?name) 
-                  (open ?outPath ?name2 "w")) then
+                  (open ?outPath ?name2 "a")) then
            (assert (parse equ file ?name)
                    (output to ?name2))
            else

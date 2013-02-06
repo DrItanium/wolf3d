@@ -4,6 +4,10 @@
 ; IGRAB-ed on Sat May 02 02:16:56 1992
 ;
 ;=====================================
+; Modified by Joshua Scoggins to be globals
+; February 6, 2013
+;=====================================
+
 
 H_BJPIC				=	3
 H_CASTLEPIC			=	4

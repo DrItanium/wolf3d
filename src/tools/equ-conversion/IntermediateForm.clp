@@ -19,7 +19,7 @@
 ;
 ; Written by Joshua Scoggins (2/6/2013)
 ;------------------------------------------------------------------------------
-(defclass types::IntermediateForm
+(defclass IntermediateForm
   "Represents the value bound to a given pair"
   (is-a USER)
   (slot id)

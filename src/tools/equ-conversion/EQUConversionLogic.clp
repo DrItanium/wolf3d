@@ -27,7 +27,7 @@
          (bind ?name (gensym*))
          (if (open ?path ?name) then
            (assert (parse equ file ?name)
-                   (output to t))
+                   (output to t from ?name))
            else
            (printout werror "ERROR: The given file " ?path " could not be opened" crlf)
            (halt)))
@@ -41,7 +41,7 @@
          (if (and (open ?path ?name) 
                   (open ?outPath ?name2 "w")) then
            (assert (parse equ file ?name)
-                   (output to ?name2))
+                   (output to ?name2 from ?name))
            else
            (printout werror "ERROR: The given file " ?path " or " ?outPath " could not be opened" crlf)
            (halt)))
@@ -75,25 +75,43 @@
          ?fct <- (parse equ file ?name line ?id eq ?value)
          =>
          (retract ?fct)
-         (make-instance of IntermediateForm (id ?id) (value ?value)))
+         (make-instance of IntermediateForm 
+          (id ?id) 
+          (from ?name) 
+          (value ?value)))
 ;------------------------------------------------------------------------------
 (defrule convert-intermediate-form-to-global-variable
          (declare (salience -1))
          (to global-variable)
-         (output to ?n)
+         (output to ?n from ?s)
          (object (is-a IntermediateForm) 
                  (id ?id) 
+                 (from ?s)
                  (value ?value))
          =>
-         (format ?n "*?%s* = %d%n" ?id ?value))
+         (format ?n "*?%s* = %s%n" ?id (str-cat ?value)))
 ;------------------------------------------------------------------------------
 (defrule convert-intermediate-form-to-object
          (declare (salience -1))
          (to object)
-         (output to ?n)
+         (output to ?n from ?s)
          (object (is-a IntermediateForm) 
                  (id ?id) 
+                 (from ?s)
                  (value ?value))
          =>
-         (format ?n "([%s] of Entry (parent nil) (id %s) (value %d))%n" ?id ?id ?value))
+         (format ?n "([%s] of Entry (parent nil) (id %s) (value %s))%n" ?id ?id (str-cat ?value)))
+;------------------------------------------------------------------------------
+(defrule close-file
+         (declare (salience -1000))
+         ?f <- (output to ?target from ?s)
+         =>
+         (retract ?f)
+         (close ?target))
+;------------------------------------------------------------------------------
+(defrule retract-close-fact
+         (declare (salience -999))
+         ?f <- (output to t from ?s)
+         =>
+         (retract ?f))
 ;------------------------------------------------------------------------------

@@ -23,5 +23,6 @@
   "Represents the value bound to a given pair"
   (is-a USER)
   (slot id)
+  (slot from)
   (slot value))
 ;------------------------------------------------------------------------------

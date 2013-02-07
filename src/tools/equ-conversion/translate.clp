@@ -1,3 +1,19 @@
+;------------------------------------------------------------------------------
+;This file is part of wolf3d-logic.
+;
+;wolf3d-logic is free software: you can redistribute it and/or modify
+;it under the terms of the Affero GNU General Public License as published by
+;the Free Software Foundation, either version 3 of the License, or
+;(at your option) any later version.
+;
+;wolf3d-logic is distributed in the hope that it will be useful,
+;but WITHOUT ANY WARRANTY; without even the implied warranty of
+;MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;Affero GNU General Public License for more details.
+;
+;You should have received a copy of the Affero GNU General Public License
+;along with wolf3d-logic.  If not, see <http://www.gnu.org/licenses/>.
+;------------------------------------------------------------------------------
 (batch* "EQUConversionLogic.clp")
 (deffunction assert-conversion-fact (?from ?to ?in ?out)
              (assert (convert equ file with 
@@ -16,7 +32,7 @@
              (from-wolfsrc-assert-conversion-fact "../../wolf-logic/resource/" ?in ?out))
 
 (assert-root-conversion-fact "GFXV_SDM.EQU" "GFXV_SDM.clp")
-(assert-root-conversion-fact "ID_SD.EQU" "IS_SD.clp")
+(assert-root-conversion-fact "ID_SD.EQU" "ID_SD.clp")
 (assert-root-conversion-fact "ID_VL.EQU" "ID_VL.clp")
 ;wl1
 (assert-wl1-conversion-fact "GFXE_WL1.EQU" "GFXE_WL1.clp")
